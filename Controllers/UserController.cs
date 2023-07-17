@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using SimpleCrudDotNetSix.Dtos;
 using SimpleCrudDotNetSix.Models;
 using SimpleCrudDotNetSix.Repository;
 using System.Security.Cryptography.X509Certificates;
@@ -10,19 +12,24 @@ namespace SimpleCrudDotNetSix.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _repository;
+        private readonly IMapper _mapper;
 
-        public UserController(IUserRepository repository)
+        public UserController(IUserRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
+
+        public IMapper Mapper { get; }
 
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             var usersDb = await _repository.SerchUsers();
-            return usersDb.Any()
-                ? Ok(usersDb)
+            var userList = _mapper.Map<List<UserDto>>(usersDb);
+            return userList.Any()
+                ? Ok(userList)
                 : NoContent();
         }
 
@@ -30,34 +37,41 @@ namespace SimpleCrudDotNetSix.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var userDb = await _repository.SerchUser(id);
-            return userDb != null
-                ? Ok(userDb)
+            var userList = _mapper.Map<UserDetailsDto>(userDb);
+
+            return userList != null
+                ? Ok(userList)
                 : NotFound("Usuario não encontrado");
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> Post(User user)
+        public async Task<IActionResult> Post(UserAddDto user)
         {
-            _repository.AddUser(user);
-            return await _repository.SaveOnChangeAsync()
-                ? Ok(user) 
+            var userAdd = _mapper.Map<User>(user);
+
+             _repository.AddUser(userAdd);
+             return await _repository.SaveOnChangeAsync()
+                ? Ok() 
                 : BadRequest("Erro ao adicionar usuario");
 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, User user)
+        public async Task<IActionResult> Put(int id, UserDto user)
         {
-            var userDb = await _repository.SerchUser(id);
-            if (userDb == null) return NotFound("Usuario não encontrado");
+            if (id <= 0) return BadRequest("Usuario não encontrado");
 
+            var userDb = await _repository.SerchUser(id);
+            
             userDb.Name = user.Name ?? userDb.Name;
             userDb.DateOfBirth = user.DateOfBirth != new DateTime()
                 ? user.DateOfBirth 
                 : userDb.DateOfBirth;
-            _repository.UpdateUser(userDb);
 
+            var userUpdate = _mapper.Map<UserDto>(user);
+
+            _repository.UpdateUser(userUpdate);
             return await _repository.SaveOnChangeAsync()
                 ? Ok(userDb)
                 : BadRequest("Erro ao atualizar usuario");
@@ -67,11 +81,11 @@ namespace SimpleCrudDotNetSix.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userDb = await _repository.SerchUser(id);
-            
-            if (userDb == null) return NotFound();
+            var userToDelete = await _repository.SerchUser(id);
+                        
+            if (userToDelete == null) return NotFound();
 
-            _repository.DeleteUser(userDb);
+            _repository.DeleteUser(userToDelete);
 
             return await _repository.SaveOnChangeAsync()
                 ? Ok("Usuario deletado") 

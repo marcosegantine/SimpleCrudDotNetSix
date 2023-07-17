@@ -17,10 +17,8 @@ builder.Services.AddControllers().AddFluentValidation(config =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddTransient<IValidator<User>, UserValidator>();
-
-
 builder.Services.AddDbContext<SimpleCrudContext>(options =>
 {
      options.UseNpgsql(builder.Configuration.GetConnectionString("Default"));

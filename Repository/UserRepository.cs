@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SimpleCrudDotNetSix.Data;
+using SimpleCrudDotNetSix.Dtos;
 using SimpleCrudDotNetSix.Models;
 
 namespace SimpleCrudDotNetSix.Repository
@@ -23,12 +24,12 @@ namespace SimpleCrudDotNetSix.Repository
                 .Where(x => x.Id == id).FirstOrDefaultAsync();
         }
 
-        public void AddUser(User user)
+        public void AddUser(UserDto user)
         {
             _context.Add(user);
         }
 
-        public void UpdateUser(User user)
+        public void UpdateUser(UserDto user)
         {
             _context.Update(user);
         }

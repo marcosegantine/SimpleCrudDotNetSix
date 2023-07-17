@@ -1,4 +1,5 @@
-﻿using SimpleCrudDotNetSix.Models;
+﻿using SimpleCrudDotNetSix.Dtos;
+using SimpleCrudDotNetSix.Models;
 
 namespace SimpleCrudDotNetSix.Repository
 {
@@ -6,10 +7,10 @@ namespace SimpleCrudDotNetSix.Repository
     {
         Task<IEnumerable<User>> SerchUsers();
         Task<User> SerchUser(int id);
-        void AddUser(User user);
-        void UpdateUser(User user);
+        void AddUser(UserDto user);
+        void UpdateUser(UserDto user);
         void DeleteUser(User user);
         Task<bool> SaveOnChangeAsync();
-
+        
     }
 }
